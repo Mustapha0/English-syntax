@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Bracket &amp; Branch</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; background: #e7e5e4; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+  #app { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 12px; }
+  .screen { width: 100%; max-width: 480px; }
+
+  h1.title { font-family: Georgia, "Times New Roman", serif; font-size: 24px; color: #1e293b; margin: 0 0 4px 0; }
+  p.subtitle { color: #64748b; font-size: 14px; margin: 0 0 20px 0; }
+
+  .lesson-list { display: flex; flex-direction: column; gap: 8px; }
+  .lesson-item {
+    display: flex; align-items: flex-start; gap: 12px; text-align: left; width: 100%;
+    background: #f5f5f4; border: 1px solid #d6d3d1; border-radius: 8px; padding: 12px;
+    font: inherit; cursor: pointer;
+  }
+  .lesson-num {
+    width: 24px; height: 24px; border-radius: 50%; background: #1e293b; color: #fafaf9;
+    font-family: monospace; font-size: 12px; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .lesson-body { flex: 1; }
+  .lesson-title-row { display: flex; align-items: center; gap: 6px; }
+  .lesson-title-text { font-family: Georgia, serif; color: #1e293b; margin: 0; }
+  .check-badge { color: #047857; font-size: 13px; }
+  .lesson-teaser { color: #64748b; font-size: 12px; margin: 2px 0 0 0; }
+
+  .fb-link { text-align: center; font-size: 12px; color: #94a3b8; margin-top: 24px; }
+  .fb-link a { color: inherit; text-decoration: underline; }
+
+  .back-btn {
+    display: flex; align-items: center; gap: 4px; font-size: 14px; color: #64748b;
+    background: none; border: none; padding: 0; margin-bottom: 12px; cursor: pointer; font: inherit;
+  }
+  h1.lesson-heading { font-family: Georgia, serif; font-size: 20px; color: #1e293b; margin: 0 0 12px 0; }
+
+  .theory-wrap { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .theory-p { font-size: 14px; color: #475569; line-height: 1.6; margin: 0; }
+
+  .example-box, .exercise-box, .result-box {
+    background: #fafaf9; border: 1px solid #d6d3d1; border-radius: 8px; padding: 12px; margin-bottom: 20px;
+  }
+  .exercise-box, .result-box { background: #f5f5f4; }
+  .eyebrow { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #78716c; margin: 0 0 4px 0; }
+  .example-sentence { font-family: Georgia, serif; color: #1e293b; font-size: 14px; margin: 0 0 4px 0; }
+  .exercise-sentence { font-family: Georgia, serif; color: #1e293b; font-size: 16px; margin: 0 0 8px 0; }
+  .exercise-hint { font-size: 12px; color: #64748b; margin: 0 0 8px 0; }
+
+  .tree-scroll { overflow-x: auto; }
+  .tree-relative { position: relative; }
+  .tree-diagram { position: relative; }
+  .tree-pill, .overlay-pill {
+    position: absolute; transform: translate(-50%, -50%); white-space: nowrap;
+    font-family: "Courier New", monospace; font-size: 11px; padding: 2px 8px; border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  }
+  .pill-blue { background: #1d4ed8; color: #fff; }
+  .overlay-pill { border: 2px solid; background: rgba(255,255,255,0.95); font-size: 10px; padding: 2px 6px; box-shadow: none; }
+
+  .word-row { position: relative; height: 30px; }
+  .word-btn {
+    position: absolute; top: 15px; transform: translate(-50%, -50%); font-family: Georgia, serif;
+    font-size: 14px; color: #1e293b; background: none; border: none; padding: 2px 5px; border-radius: 4px;
+    white-space: nowrap; cursor: pointer;
+  }
+  .word-btn:active, .word-btn:hover { background: #e7e5e4; }
+  .word-btn-selected, .word-btn-selected:hover { background: #fde68a; color: #1e293b; }
+
+  .label-picker-holder { margin-top: 8px; }
+  .label-picker-caption { font-size: 12px; color: #475569; margin: 0 0 6px 0; }
+  .label-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .label-btn {
+    padding: 6px 10px; border-radius: 6px; font-size: 12px; font-family: monospace;
+    background: #1e293b; color: #fff; border: none; cursor: pointer;
+  }
+  .cancel-btn {
+    padding: 5px 8px; border-radius: 6px; font-size: 12px; border: 1px solid #d6d3d1;
+    color: #475569; background: #fff; cursor: pointer;
+  }
+
+  .chips-holder { margin-top: 8px; }
+  .chips-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px;
+    font-size: 12px; background: #fff; border: 1px solid #d6d3d1; color: #334155;
+  }
+  .chip-label { font-family: monospace; color: #1d4ed8; }
+  .chip-remove { background: none; border: none; color: #a8a29e; cursor: pointer; font-size: 12px; padding: 0 0 0 2px; }
+  .chip-remove:hover { color: #b91c1c; }
+
+  .actions-row { display: flex; gap: 8px; margin-top: 10px; }
+  .icon-btn {
+    padding: 8px 10px; border-radius: 6px; border: 1px solid #d6d3d1; background: #fff;
+    color: #1e293b; cursor: pointer; font-size: 15px;
+  }
+  .check-btn {
+    flex: 1; padding: 9px; border-radius: 6px; background: #047857; color: #fff;
+    border: none; font-size: 14px; font-weight: 500; cursor: pointer;
+  }
+
+  .hint-text { font-size: 12px; color: #b91c1c; margin: 0 0 12px 0; display: none; }
+
+  .result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .result-count { font-family: Georgia, serif; color: #1e293b; margin: 0; }
+  .perfect-badge { display: flex; align-items: center; gap: 4px; color: #047857; font-size: 13px; font-weight: 500; }
+  .result-list { display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+  .result-row { display: flex; gap: 8px; }
+  .tag {
+    font-family: monospace; font-size: 11px; padding: 1px 4px; border-radius: 3px; flex-shrink: 0;
+    margin-top: 2px; height: fit-content;
+  }
+  .tag-missing { color: #A6482F; border: 1px solid #A6482F; }
+  .tag-label { color: #B8863B; border: 1px solid #B8863B; }
+  .tag-extra { color: #78716c; border: 1px solid #a8a29e; }
+  .result-line { color: #1e293b; margin: 0; }
+  .inline-pill {
+    font-family: monospace; font-size: 11px; background: #1d4ed8; color: #fff;
+    padding: 1px 4px; border-radius: 3px; margin-right: 4px;
+  }
+  .result-note { color: #64748b; font-size: 12px; margin: 2px 0 0 0; }
+  .all-good { color: #047857; margin: 0; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+
+// ---------------- Layout constants ----------------
+var SPACING = 62;
+var ROW_HEIGHT = 56;
+var TOP_PAD = 20;
+
+// Labels the student can tag a span with — the full set used across every
+// lesson's answer key.
+var LABELS = ["NP", "VP", "PP", "S", "CP", "AdjP", "AdvP"];
+
+var LESSONS = [
+  {
+    "id": "constituents",
+    "title": "What's a Constituent?",
+    "teaser": "The foundation — how to tell a real phrase from a random string of words.",
+    "theory": [
+      "A constituent is a group of words that behaves like a single grammatical unit — it can be moved, replaced, or questioned as a block, while an arbitrary string of words usually can't.",
+      "Linguists test for constituency: can the string be swapped for one pro-form (it, do so, there)? Can it be moved to the front of the sentence? Can it stand alone as the answer to a question?",
+      "Every tree you draw should be built entirely out of constituents — no crossing branches, and every node should pass at least one of these tests."
+    ],
+    "example": {
+      "sentence": "Birds fly.",
+      "words": ["Birds", "fly"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP" },
+        { "s": 1, "e": 1, "label": "VP" },
+        { "s": 0, "e": 1, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "The cat sleeps.",
+      "words": ["The", "cat", "sleeps"],
+      "gold": [
+        { "s": 0, "e": 1, "label": "NP", "note": "\u201CThe cat\u201D groups the determiner and noun — swap it for \u201Cit\u201D and the sentence still works.", "test": "Pronoun substitution: \u201CIt sleeps.\u201D" },
+        { "s": 2, "e": 2, "label": "VP", "note": "\u201Csleeps\u201D is the predicate — what the sentence says about the subject." },
+        { "s": 0, "e": 2, "label": "S", "note": "The full sentence: subject NP + predicate VP." }
+      ]
+    }
+  },
+  {
+    "id": "np",
+    "title": "Noun Phrases (NP)",
+    "teaser": "Determiners, adjectives, and how a PP can hide inside a noun phrase.",
+    "theory": [
+      "A noun phrase is built around a noun and can include a determiner (the, a), adjectives, and modifiers that follow the noun — most commonly prepositional phrases.",
+      "Even when a PP modifies the noun (\u201Cthe man in the park\u201D), the whole string is usually one NP — the PP sits inside it rather than beside it.",
+      "Test it: \u201Cthe man in the park\u201D can be replaced wholesale by \u201Che,\u201D which shows the determiner, noun, and PP together form a single constituent."
+    ],
+    "example": {
+      "sentence": "The man in the park smiled.",
+      "words": ["The", "man", "in", "the", "park", "smiled"],
+      "gold": [
+        { "s": 3, "e": 4, "label": "NP" },
+        { "s": 2, "e": 4, "label": "PP" },
+        { "s": 0, "e": 4, "label": "NP" },
+        { "s": 5, "e": 5, "label": "VP" },
+        { "s": 0, "e": 5, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "The book on the shelf fell.",
+      "words": ["The", "book", "on", "the", "shelf", "fell"],
+      "gold": [
+        { "s": 3, "e": 4, "label": "NP", "note": "\u201Cthe shelf\u201D — object of the preposition \u201Con\u201D." },
+        { "s": 2, "e": 4, "label": "PP", "note": "\u201Con the shelf\u201D — preposition plus its NP, modifying \u201Cbook\u201D." },
+        { "s": 0, "e": 4, "label": "NP", "note": "Determiner + noun + modifying PP together form one subject NP.", "test": "Pronoun substitution: \u201CIt fell.\u201D" },
+        { "s": 5, "e": 5, "label": "VP", "note": "\u201Cfell\u201D — the predicate, with no object." },
+        { "s": 0, "e": 5, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "vp",
+    "title": "Verb Phrases (VP) & Complements",
+    "teaser": "The verb plus its objects — and why subject + verb usually isn't a unit.",
+    "theory": [
+      "A verb phrase is the predicate: the verb plus everything it needs to complete its meaning — objects and other complements — but never the subject.",
+      "The classic test is \u201Cdo so\u201D replacement: if you can say \u201C...and so-and-so did so too,\u201D the verb and its complement(s) form one VP.",
+      "Subjects and verbs almost never form a constituent on their own — \u201Cthe dog chased\u201D isn't a unit you can replace or move without the object."
+    ],
+    "example": {
+      "sentence": "The girl ate an apple.",
+      "words": ["The", "girl", "ate", "an", "apple"],
+      "gold": [
+        { "s": 0, "e": 1, "label": "NP" },
+        { "s": 3, "e": 4, "label": "NP" },
+        { "s": 2, "e": 4, "label": "VP" },
+        { "s": 0, "e": 4, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "The dog chased the ball.",
+      "words": ["The", "dog", "chased", "the", "ball"],
+      "gold": [
+        { "s": 0, "e": 1, "label": "NP", "note": "\u201CThe dog\u201D — determiner + noun, the subject." },
+        { "s": 3, "e": 4, "label": "NP", "note": "\u201Cthe ball\u201D — the direct object." },
+        { "s": 2, "e": 4, "label": "VP", "note": "The verb and its object form a unit that excludes the subject.", "test": "\u201CDo so\u201D replacement: \u201C...and the cat did so too.\u201D" },
+        { "s": 0, "e": 4, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "pp-attach",
+    "title": "PP Attachment",
+    "teaser": "The same words, two trees, two meanings.",
+    "theory": [
+      "A prepositional phrase can attach in more than one place: inside an NP, modifying a noun, or inside a VP, modifying the whole action.",
+      "The same sentence can have two completely different trees — and two different meanings — depending on where the PP attaches. That's structural ambiguity.",
+      "\u201CI saw the woman with binoculars\u201D can mean the woman had binoculars (PP inside the object NP) or that you used binoculars to see her (PP inside the VP)."
+    ],
+    "example": {
+      "sentence": "I saw the woman with binoculars.",
+      "words": ["I", "saw", "the", "woman", "with", "binoculars"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP" },
+        { "s": 2, "e": 3, "label": "NP" },
+        { "s": 4, "e": 5, "label": "PP" },
+        { "s": 1, "e": 5, "label": "VP" },
+        { "s": 0, "e": 5, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "The boy saw the man with the telescope.",
+      "words": ["The", "boy", "saw", "the", "man", "with", "the", "telescope"],
+      "gold": [
+        { "s": 0, "e": 1, "label": "NP", "note": "\u201CThe boy\u201D — the subject." },
+        { "s": 3, "e": 4, "label": "NP", "note": "\u201Cthe man\u201D — the direct object, the person seen." },
+        { "s": 6, "e": 7, "label": "NP", "note": "\u201Cthe telescope\u201D — object of the preposition \u201Cwith\u201D." },
+        { "s": 5, "e": 7, "label": "PP", "note": "\u201Cwith the telescope\u201D — preposition plus its NP." },
+        { "s": 2, "e": 7, "label": "VP", "note": "The PP attaches high, to the VP: the boy used the telescope to see. This is the instrument reading." },
+        { "s": 0, "e": 7, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "cp",
+    "title": "Clauses & Complementizers (CP)",
+    "teaser": "Embedded clauses, \u201Cthat,\u201D and verbs that take a whole clause as their object.",
+    "theory": [
+      "Some verbs take a whole clause as their complement, introduced by a complementizer like \u201Cthat,\u201D \u201Cwhether,\u201D or \u201Cif.\u201D",
+      "That complementizer plus the clause it introduces together form a CP: \u201Cthat he will win\u201D = Comp + S.",
+      "The matrix VP then contains the main verb plus its CP complement, just like a VP can contain a verb plus an NP object."
+    ],
+    "example": {
+      "sentence": "He said that she left.",
+      "words": ["He", "said", "that", "she", "left"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP" },
+        { "s": 3, "e": 3, "label": "NP" },
+        { "s": 4, "e": 4, "label": "VP" },
+        { "s": 3, "e": 4, "label": "S" },
+        { "s": 2, "e": 4, "label": "CP" },
+        { "s": 1, "e": 4, "label": "VP" },
+        { "s": 0, "e": 4, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "She thinks that he will win.",
+      "words": ["She", "thinks", "that", "he", "will", "win"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP", "note": "A bare pronoun can be a full NP on its own." },
+        { "s": 3, "e": 3, "label": "NP", "note": "\u201Che\u201D — subject of the embedded clause." },
+        { "s": 4, "e": 5, "label": "VP", "note": "\u201Cwill win\u201D — auxiliary plus main verb." },
+        { "s": 3, "e": 5, "label": "S", "note": "The embedded clause has its own subject and predicate." },
+        { "s": 2, "e": 5, "label": "CP", "note": "The complementizer \u201Cthat\u201D plus the clause it introduces.", "test": "CP = Comp + S" },
+        { "s": 1, "e": 5, "label": "VP", "note": "The main verb plus its entire clausal complement.", "test": "\u201Cthinks\u201D takes a CP complement." },
+        { "s": 0, "e": 5, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "intro-syntax",
+    "title": "Introduction to Syntax and Grammar",
+    "teaser": "What syntax studies, and why word order isn't just convention.",
+    "theory": [
+      "Syntax is the study of how words combine to form phrases and sentences, and why some combinations are grammatical while others aren't, regardless of meaning.",
+      "Speakers of a language have tacit knowledge of its syntax: they can judge a sentence as well-formed or not even without being able to state the rule.",
+      "A grammar is a formal system of rules or principles that generates all and only the grammatical sentences of a language."
+    ],
+    "example": {
+      "sentence": "Dogs bark.",
+      "words": ["Dogs", "bark"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP" },
+        { "s": 1, "e": 1, "label": "VP" },
+        { "s": 0, "e": 1, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "Birds sing loudly.",
+      "words": ["Birds", "sing", "loudly"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP", "note": "\u201CBirds\u201D — a bare NP subject." },
+        { "s": 2, "e": 2, "label": "AdvP", "note": "\u201Cloudly\u201D modifies the verb — an adverb phrase." },
+        { "s": 1, "e": 2, "label": "VP", "note": "The verb plus its adverbial modifier form the predicate.", "test": "Do so: \u201C...and the cat did so too, loudly.\u201D" },
+        { "s": 0, "e": 2, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "parts-of-speech",
+    "title": "Parts of Speech and Lexical Categories",
+    "teaser": "Nouns, verbs, adjectives, and how category determines what a word can do.",
+    "theory": [
+      "Words belong to lexical categories — noun (N), verb (V), adjective (A), adverb (Adv), preposition (P) — based on their form, meaning, and distribution, not just meaning alone.",
+      "Category determines what a word can combine with: a determiner precedes a noun, an adverb can modify a verb or adjective, only verbs take tense.",
+      "Phrasal categories are built around a lexical head of the same category: a noun phrase is headed by a noun, a verb phrase by a verb."
+    ],
+    "example": {
+      "sentence": "The tall man left.",
+      "words": ["The", "tall", "man", "left"],
+      "gold": [
+        { "s": 1, "e": 1, "label": "AdjP" },
+        { "s": 0, "e": 2, "label": "NP" },
+        { "s": 3, "e": 3, "label": "VP" },
+        { "s": 0, "e": 3, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "The very tall man arrived quickly.",
+      "words": ["The", "very", "tall", "man", "arrived", "quickly"],
+      "gold": [
+        { "s": 1, "e": 2, "label": "AdjP", "note": "\u201Cvery tall\u201D — degree word + adjective form one adjective phrase." },
+        { "s": 0, "e": 3, "label": "NP", "note": "Determiner + AdjP + noun combine into one NP headed by \u201Cman\u201D.", "test": "Pronoun substitution: \u201CHe arrived quickly.\u201D" },
+        { "s": 5, "e": 5, "label": "AdvP", "note": "\u201Cquickly\u201D — a single adverb phrase modifying the verb." },
+        { "s": 4, "e": 5, "label": "VP", "note": "The verb plus its adverbial modifier." },
+        { "s": 0, "e": 5, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "phrases-clauses-sentences",
+    "title": "Phrases, Clauses, and Sentences",
+    "teaser": "Why a clause has a subject and predicate, and a sentence can hold more than one.",
+    "theory": [
+      "A phrase is a group of words built around one head, like an NP or PP, with no subject-predicate structure of its own.",
+      "A clause contains a subject and a predicate, built around a verb — it can stand as a sentence, or be embedded inside another clause.",
+      "A sentence is the largest structural unit built from one or more clauses combined, often by a complementizer or conjunction."
+    ],
+    "example": {
+      "sentence": "She knows that he left.",
+      "words": ["She", "knows", "that", "he", "left"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP" },
+        { "s": 3, "e": 3, "label": "NP" },
+        { "s": 4, "e": 4, "label": "VP" },
+        { "s": 3, "e": 4, "label": "S" },
+        { "s": 2, "e": 4, "label": "CP" },
+        { "s": 1, "e": 4, "label": "VP" },
+        { "s": 0, "e": 4, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "I believe that the plan worked.",
+      "words": ["I", "believe", "that", "the", "plan", "worked"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP", "note": "\u201CI\u201D — a bare pronoun NP, the matrix subject." },
+        { "s": 3, "e": 4, "label": "NP", "note": "\u201Cthe plan\u201D — subject of the embedded clause." },
+        { "s": 5, "e": 5, "label": "VP", "note": "\u201Cworked\u201D — predicate of the embedded clause." },
+        { "s": 3, "e": 5, "label": "S", "note": "The embedded clause: its own subject + predicate." },
+        { "s": 2, "e": 5, "label": "CP", "note": "Complementizer \u201Cthat\u201D plus the clause it introduces.", "test": "CP = Comp + S" },
+        { "s": 1, "e": 5, "label": "VP", "note": "The matrix verb plus its clausal complement." },
+        { "s": 0, "e": 5, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "head-complements-adjuncts",
+    "title": "Head, Complements, and Adjuncts",
+    "teaser": "Every phrase has one head — and complements are required where adjuncts are optional.",
+    "theory": [
+      "Every phrase has a head that determines its category and core meaning — everything else in the phrase relates back to that head.",
+      "A complement is selected by the head and often obligatory — a verb like \u201Cput\u201D needs both an object and a location to be complete.",
+      "An adjunct is optional and can be added or removed without making the sentence ungrammatical — adjuncts modify, complements complete."
+    ],
+    "example": {
+      "sentence": "She read the book.",
+      "words": ["She", "read", "the", "book"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP" },
+        { "s": 2, "e": 3, "label": "NP" },
+        { "s": 1, "e": 3, "label": "VP" },
+        { "s": 0, "e": 3, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "She read the book yesterday.",
+      "words": ["She", "read", "the", "book", "yesterday"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP", "note": "The subject." },
+        { "s": 2, "e": 3, "label": "NP", "note": "\u201Cthe book\u201D — the complement of \u201Cread\u201D: obligatory, since \u201C*She read\u201D alone sounds incomplete here." },
+        { "s": 4, "e": 4, "label": "AdvP", "note": "\u201Cyesterday\u201D — an adjunct: optional, it can be dropped and the sentence stays fine." },
+        { "s": 1, "e": 4, "label": "VP", "note": "Verb + complement + adjunct together form the VP, but only the complement is selected by the verb.", "test": "Try dropping each part: the complement can't go, the adjunct can." },
+        { "s": 0, "e": 4, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "constituency-tests",
+    "title": "Constituency and Constituency Tests",
+    "teaser": "Proving a string is a real phrase: substitution, movement, and coordination.",
+    "theory": [
+      "Three classic tests diagnose constituency: substitution (replace the string with a single pro-form), movement (front the string, e.g. in a cleft), and coordination (conjoin it with a similar string).",
+      "If a string passes even one test cleanly, it's good evidence it forms a constituent; failing a test isn't always conclusive on its own.",
+      "Constituency tests are especially useful for resolving attachment ambiguity, since only the correct grouping will pass."
+    ],
+    "example": {
+      "sentence": "The kids played outside.",
+      "words": ["The", "kids", "played", "outside"],
+      "gold": [
+        { "s": 0, "e": 1, "label": "NP" },
+        { "s": 3, "e": 3, "label": "AdvP" },
+        { "s": 2, "e": 3, "label": "VP" },
+        { "s": 0, "e": 3, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "The old dog barked twice.",
+      "words": ["The", "old", "dog", "barked", "twice"],
+      "gold": [
+        { "s": 1, "e": 1, "label": "AdjP", "note": "\u201Cold\u201D — a one-word adjective phrase modifying \u201Cdog\u201D." },
+        { "s": 0, "e": 2, "label": "NP", "note": "\u201CThe old dog\u201D passes the substitution test.", "test": "Substitution: \u201CIt barked twice.\u201D" },
+        { "s": 4, "e": 4, "label": "AdvP", "note": "\u201Ctwice\u201D — an adverbial constituent on its own." },
+        { "s": 3, "e": 4, "label": "VP", "note": "\u201Cbarked twice\u201D passes the coordination test.", "test": "Coordination: \u201Cbarked twice and left\u201D." },
+        { "s": 0, "e": 4, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "context-free-grammars",
+    "title": "Context-Free Grammars",
+    "teaser": "Rewrite rules that generate every grammatical sentence, and only those.",
+    "theory": [
+      "A context-free grammar (CFG) is a set of rewrite rules, each expanding one category into a sequence of categories or words, independent of surrounding context.",
+      "A rule like S → NP VP says a sentence can be rewritten as a noun phrase followed by a verb phrase; applying rules repeatedly generates a full tree.",
+      "A CFG is context-free because each rule applies to a category regardless of what surrounds it — a simplification, but one that captures a great deal of syntactic structure."
+    ],
+    "example": {
+      "sentence": "Fish swim.",
+      "words": ["Fish", "swim"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP" },
+        { "s": 1, "e": 1, "label": "VP" },
+        { "s": 0, "e": 1, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "The children laughed.",
+      "words": ["The", "children", "laughed"],
+      "gold": [
+        { "s": 0, "e": 1, "label": "NP", "note": "Generated by NP → Det N.", "test": "Rule: NP → Det N" },
+        { "s": 2, "e": 2, "label": "VP", "note": "Generated by VP → V.", "test": "Rule: VP → V" },
+        { "s": 0, "e": 2, "label": "S", "note": "Generated by S → NP VP.", "test": "Rule: S → NP VP" }
+      ]
+    }
+  },
+  {
+    "id": "phrase-structure-rules",
+    "title": "Phrase Structure Rules",
+    "teaser": "How NP → (Det) (AdjP) N (PP) builds every noun phrase you'll ever tag.",
+    "theory": [
+      "Phrase structure rules state, category by category, what a phrase can contain: NP → (Det) (AdjP) N (PP), VP → V (NP) (PP), PP → P NP.",
+      "Parentheses mark optional material — a determiner or adjective phrase can be dropped, but the head noun, verb, or preposition can't.",
+      "Applying these rules recursively is what lets a PP inside an NP itself contain another NP, generating infinitely many sentences from a small rule set."
+    ],
+    "example": {
+      "sentence": "The big dog barked.",
+      "words": ["The", "big", "dog", "barked"],
+      "gold": [
+        { "s": 1, "e": 1, "label": "AdjP" },
+        { "s": 0, "e": 2, "label": "NP" },
+        { "s": 3, "e": 3, "label": "VP" },
+        { "s": 0, "e": 3, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "The small cat near the door meowed.",
+      "words": ["The", "small", "cat", "near", "the", "door", "meowed"],
+      "gold": [
+        { "s": 1, "e": 1, "label": "AdjP", "note": "AdjP → A, filling the optional slot in NP → (Det)(AdjP) N (PP)." },
+        { "s": 4, "e": 5, "label": "NP", "note": "\u201Cthe door\u201D — object of the preposition." },
+        { "s": 3, "e": 5, "label": "PP", "note": "PP → P NP." },
+        { "s": 0, "e": 5, "label": "NP", "note": "NP → Det AdjP N PP — every optional slot filled.", "test": "Substitution: \u201CIt meowed.\u201D" },
+        { "s": 6, "e": 6, "label": "VP", "note": "VP → V, with no complement." },
+        { "s": 0, "e": 6, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "x-bar-theory",
+    "title": "X-Bar Theory",
+    "teaser": "Every phrase has the same skeleton: specifier, head, complement — whatever its category.",
+    "theory": [
+      "X-bar theory proposes every phrase, regardless of category, shares the same template: a specifier position, an intermediate X′ level, and a head X with its complement.",
+      "This uniform template explains why NP, VP, and PP all behave alike structurally — a determiner sits in NP's specifier the way a degree word sits in AdjP's.",
+      "We won't draw the intermediate X′ level explicitly here, but every NP/VP/PP you tag below is really shorthand for a full X-bar structure underneath."
+    ],
+    "example": {
+      "sentence": "Very happy students left.",
+      "words": ["Very", "happy", "students", "left"],
+      "gold": [
+        { "s": 0, "e": 1, "label": "AdjP" },
+        { "s": 0, "e": 2, "label": "NP" },
+        { "s": 3, "e": 3, "label": "VP" },
+        { "s": 0, "e": 3, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "Quite young players won easily.",
+      "words": ["Quite", "young", "players", "won", "easily"],
+      "gold": [
+        { "s": 0, "e": 1, "label": "AdjP", "note": "\u201CQuite young\u201D — degree specifier + adjective head, the AdjP's own X-bar structure." },
+        { "s": 0, "e": 2, "label": "NP", "note": "The AdjP sits in the modifier slot of NP, with \u201Cplayers\u201D as the head." },
+        { "s": 4, "e": 4, "label": "AdvP", "note": "\u201Ceasily\u201D — a one-word AdvP." },
+        { "s": 3, "e": 4, "label": "VP", "note": "\u201Cwon\u201D is the head V, with the AdvP adjoined to its projection." },
+        { "s": 0, "e": 4, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "tree-diagrams",
+    "title": "Tree Diagrams and Syntactic Trees",
+    "teaser": "Reading the branches: every node dominates everything beneath it.",
+    "theory": [
+      "A tree diagram represents structure top-down: the root node (S) dominates every other node, and each branch shows a part-whole relationship.",
+      "A node 'dominates' everything below it in the tree; two nodes with the same mother are 'sisters', like a head and its complement.",
+      "No branches may cross in a well-formed tree — that's exactly what constituency and containment enforce together."
+    ],
+    "example": {
+      "sentence": "The boy smiled.",
+      "words": ["The", "boy", "smiled"],
+      "gold": [
+        { "s": 0, "e": 1, "label": "NP" },
+        { "s": 2, "e": 2, "label": "VP" },
+        { "s": 0, "e": 2, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "The young girl laughed loudly.",
+      "words": ["The", "young", "girl", "laughed", "loudly"],
+      "gold": [
+        { "s": 1, "e": 1, "label": "AdjP", "note": "A node dominating just \u201Cyoung\u201D." },
+        { "s": 0, "e": 2, "label": "NP", "note": "NP dominates Det, AdjP, and N — all three are its daughters." },
+        { "s": 4, "e": 4, "label": "AdvP", "note": "AdvP dominating \u201Cloudly\u201D." },
+        { "s": 3, "e": 4, "label": "VP", "note": "VP and its sister AdvP node — V and AdvP are sisters here." },
+        { "s": 0, "e": 4, "label": "S", "note": "The root: S dominates every node in the tree." }
+      ]
+    }
+  },
+  {
+    "id": "subject-object-predicate",
+    "title": "Subject, Object, and Predicate",
+    "teaser": "Grammatical relations aren't categories — they're positions in the tree.",
+    "theory": [
+      "The subject is the NP that combines with VP to form S; the predicate is the VP itself, describing what's said about the subject.",
+      "A direct object is the NP complement most closely selected by the verb; an indirect object, when present, typically precedes it.",
+      "Grammatical relations are defined structurally — by position in the tree — not by meaning, which is why the same NP can be a subject in one sentence and an object in another."
+    ],
+    "example": {
+      "sentence": "The teacher graded the essay.",
+      "words": ["The", "teacher", "graded", "the", "essay"],
+      "gold": [
+        { "s": 0, "e": 1, "label": "NP" },
+        { "s": 3, "e": 4, "label": "NP" },
+        { "s": 2, "e": 4, "label": "VP" },
+        { "s": 0, "e": 4, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "The coach gave the team advice.",
+      "words": ["The", "coach", "gave", "the", "team", "advice"],
+      "gold": [
+        { "s": 0, "e": 1, "label": "NP", "note": "\u201CThe coach\u201D — the subject." },
+        { "s": 3, "e": 4, "label": "NP", "note": "\u201Cthe team\u201D — the indirect object, positioned closer to the verb." },
+        { "s": 5, "e": 5, "label": "NP", "note": "\u201Cadvice\u201D — the direct object." },
+        { "s": 2, "e": 5, "label": "VP", "note": "Verb + indirect object + direct object together form the predicate." },
+        { "s": 0, "e": 5, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "theta-roles",
+    "title": "Argument Structure and Theta Roles",
+    "teaser": "Every verb assigns semantic roles to its arguments: who does what to whom.",
+    "theory": [
+      "Argument structure specifies how many arguments a verb requires and what semantic roles — theta roles — it assigns to each: Agent, Theme, Goal, Experiencer, and more.",
+      "A verb like \u201Cgive\u201D assigns Agent to its subject, Theme to its direct object, and Goal to its indirect object; a verb like \u201Cbreak\u201D assigns Agent and Theme but no Goal.",
+      "Theta roles are assigned within the VP, close to the verb, and every argument must receive exactly one — the Theta Criterion."
+    ],
+    "example": {
+      "sentence": "The chef broke the plate.",
+      "words": ["The", "chef", "broke", "the", "plate"],
+      "gold": [
+        { "s": 0, "e": 1, "label": "NP" },
+        { "s": 3, "e": 4, "label": "NP" },
+        { "s": 2, "e": 4, "label": "VP" },
+        { "s": 0, "e": 4, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "The wind pushed the boat ashore.",
+      "words": ["The", "wind", "pushed", "the", "boat", "ashore"],
+      "gold": [
+        { "s": 0, "e": 1, "label": "NP", "note": "\u201CThe wind\u201D — receives the Agent (or Causer) role." },
+        { "s": 3, "e": 4, "label": "NP", "note": "\u201Cthe boat\u201D — receives the Theme role, the entity affected." },
+        { "s": 5, "e": 5, "label": "AdvP", "note": "\u201Cashore\u201D — a Goal/location adjunct." },
+        { "s": 2, "e": 5, "label": "VP", "note": "The verb assigns its theta roles to the arguments within this VP." },
+        { "s": 0, "e": 5, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "case-theory",
+    "title": "Case Theory",
+    "teaser": "Why 'he' becomes 'him' as an object — abstract Case, made visible on pronouns.",
+    "theory": [
+      "Case theory holds that every overt NP must be assigned abstract Case — a licensing requirement, distinct from the visible case marking English shows only on pronouns (he/him, she/her).",
+      "Subjects typically receive nominative Case from finite tense (I, he, she); objects of verbs and prepositions receive accusative Case (me, him, her).",
+      "The Case Filter rules out any sentence where an overt NP fails to get Case — it's why \u201C*Him left\u201D is ungrammatical even though the meaning is clear."
+    ],
+    "example": {
+      "sentence": "She saw him.",
+      "words": ["She", "saw", "him"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP" },
+        { "s": 2, "e": 2, "label": "NP" },
+        { "s": 1, "e": 2, "label": "VP" },
+        { "s": 0, "e": 2, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "They gave her the keys.",
+      "words": ["They", "gave", "her", "the", "keys"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP", "note": "\u201CThey\u201D — nominative Case, assigned by finite tense to the subject." },
+        { "s": 2, "e": 2, "label": "NP", "note": "\u201Cher\u201D — accusative Case, assigned by the verb to the indirect object." },
+        { "s": 3, "e": 4, "label": "NP", "note": "\u201Cthe keys\u201D — also accusative Case, assigned by the verb to the direct object." },
+        { "s": 1, "e": 4, "label": "VP", "note": "The verb assigns Case to both NP complements within its own VP." },
+        { "s": 0, "e": 4, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "subcategorization",
+    "title": "Subcategorization and Selectional Restrictions",
+    "teaser": "Verbs are picky: what category — and what meaning — of complement they'll take.",
+    "theory": [
+      "Subcategorization specifies the syntactic category (or categories) of complement a verb requires: \u201Cdevour\u201D needs an NP, \u201Crely\u201D needs a PP headed by \u201Con\u201D, \u201Cthink\u201D can take a CP.",
+      "Selectional restrictions are the semantic counterpart: \u201Cdrink\u201D selects a liquid Theme, which is why \u201CThe rock drank the water\u201D is syntactically fine but semantically odd.",
+      "A verb's subcategorization frame is listed in the lexicon and directly constrains which phrase structure rules can combine with it."
+    ],
+    "example": {
+      "sentence": "She relies on him.",
+      "words": ["She", "relies", "on", "him"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP" },
+        { "s": 3, "e": 3, "label": "NP" },
+        { "s": 2, "e": 3, "label": "PP" },
+        { "s": 1, "e": 3, "label": "VP" },
+        { "s": 0, "e": 3, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "He hopes that she stays.",
+      "words": ["He", "hopes", "that", "she", "stays"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP", "note": "The matrix subject." },
+        { "s": 3, "e": 3, "label": "NP", "note": "\u201Cshe\u201D — subject of the embedded clause." },
+        { "s": 4, "e": 4, "label": "VP", "note": "\u201Cstays\u201D — predicate of the embedded clause." },
+        { "s": 3, "e": 4, "label": "S", "note": "The embedded clause." },
+        { "s": 2, "e": 4, "label": "CP", "note": "\u201Chopes\u201D subcategorizes for a CP, not an NP — compare \u201C*He hopes the party.\u201D", "test": "Subcategorization frame: hope + CP" },
+        { "s": 1, "e": 4, "label": "VP", "note": "The matrix VP, headed by a verb that selects a CP." },
+        { "s": 0, "e": 4, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "binding-theory",
+    "title": "Binding Theory (Anaphora, Pronouns, and R-expressions)",
+    "teaser": "Why 'himself' needs a local antecedent, and a name can't have one at all.",
+    "theory": [
+      "Binding theory classifies NPs into three types with different reference requirements: anaphors (reflexives like \u201Chimself\u201D), pronouns (\u201Chim\u201D), and R-expressions (names like \u201CJohn\u201D).",
+      "Principle A requires an anaphor to be bound within its local clause — \u201CJohn saw himself\u201D is fine, \u201C*John said Mary saw himself\u201D is not.",
+      "Principle B requires a pronoun to be free within its local clause, and Principle C requires an R-expression to be free everywhere — near mirror images of each other."
+    ],
+    "example": {
+      "sentence": "John blamed himself.",
+      "words": ["John", "blamed", "himself"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP" },
+        { "s": 2, "e": 2, "label": "NP" },
+        { "s": 1, "e": 2, "label": "VP" },
+        { "s": 0, "e": 2, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "Mary hurt herself badly.",
+      "words": ["Mary", "hurt", "herself", "badly"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP", "note": "\u201CMary\u201D — the antecedent, an R-expression." },
+        { "s": 2, "e": 2, "label": "NP", "note": "\u201Cherself\u201D — an anaphor, bound by \u201CMary\u201D within this same clause." },
+        { "s": 3, "e": 3, "label": "AdvP", "note": "\u201Cbadly\u201D — an adjunct." },
+        { "s": 1, "e": 3, "label": "VP", "note": "The local clause in which the anaphor must be bound.", "test": "Principle A: anaphor bound within its own clause." },
+        { "s": 0, "e": 3, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "head-movement",
+    "title": "Head Movement (Auxiliary Inversion, V-to-I)",
+    "teaser": "How an auxiliary hops over the subject to form a question.",
+    "theory": [
+      "Head movement moves one head to another head position, adjoining to it — English shows this in subject-auxiliary inversion, where an auxiliary moves from I(nfl) to C.",
+      "\u201CShe is leaving\u201D becomes \u201CIs she leaving?\u201D by moving the auxiliary \u201Cis\u201D leftward past the subject, into the position associated with clause-typing.",
+      "Only auxiliaries and modals undergo this movement in Modern English; main verbs stay in place and trigger \u201Cdo\u201D-support instead (\u201CDoes she leave?\u201D, not \u201C*Leaves she?\u201D)."
+    ],
+    "example": {
+      "sentence": "Is she leaving?",
+      "words": ["Is", "she", "leaving"],
+      "gold": [
+        { "s": 1, "e": 1, "label": "NP" },
+        { "s": 2, "e": 2, "label": "VP" },
+        { "s": 0, "e": 2, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "Can they finish today?",
+      "words": ["Can", "they", "finish", "today"],
+      "gold": [
+        { "s": 1, "e": 1, "label": "NP", "note": "\u201Cthey\u201D — the subject, now following the moved auxiliary." },
+        { "s": 3, "e": 3, "label": "AdvP", "note": "\u201Ctoday\u201D — an adjunct." },
+        { "s": 2, "e": 3, "label": "VP", "note": "The verb phrase, left behind by the moved auxiliary." },
+        { "s": 0, "e": 3, "label": "S", "note": "\u201CCan\u201D has moved from its base position to the front of the clause.", "test": "Head movement: Aux moves to clause-initial position." }
+      ]
+    }
+  },
+  {
+    "id": "wh-movement",
+    "title": "Wh-Movement and Question Formation",
+    "teaser": "Where a wh-word 'starts' versus where it ends up.",
+    "theory": [
+      "Wh-movement fronts a wh-phrase (who, what, which book) from its base position — where it's interpreted as an argument — to the specifier of CP, leaving a silent trace behind.",
+      "\u201CWhat did she buy?\u201D is understood as \u201Cshe buy what\u201D, with \u201Cwhat\u201D moved to the front; the trace marks the object position it originated from.",
+      "This is a dependency: the fronted phrase and its base position are grammatically linked, even though only one is pronounced."
+    ],
+    "example": {
+      "sentence": "What did she buy?",
+      "words": ["What", "did", "she", "buy"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP" },
+        { "s": 2, "e": 2, "label": "NP" },
+        { "s": 3, "e": 3, "label": "VP" },
+        { "s": 2, "e": 3, "label": "S" },
+        { "s": 0, "e": 3, "label": "CP" }
+      ]
+    },
+    "exercise": {
+      "sentence": "Who did he invite?",
+      "words": ["Who", "did", "he", "invite"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP", "note": "\u201CWho\u201D — base-generated as the object of \u201Cinvite\u201D but pronounced up front." },
+        { "s": 2, "e": 2, "label": "NP", "note": "\u201Che\u201D — the subject." },
+        { "s": 3, "e": 3, "label": "VP", "note": "Its object position is where \u201Cwho\u201D is interpreted, though nothing is pronounced there." },
+        { "s": 2, "e": 3, "label": "S", "note": "The clause left after the wh-phrase and auxiliary have moved out." },
+        { "s": 0, "e": 3, "label": "CP", "note": "\u201CWho\u201D sits in the specifier of CP, the landing site for wh-movement.", "test": "Wh-movement: object fronted to Spec-CP." }
+      ]
+    }
+  },
+  {
+    "id": "passive",
+    "title": "Passive Constructions and DP-Movement",
+    "teaser": "How the object of an active sentence becomes the subject of a passive one.",
+    "theory": [
+      "In a passive sentence, the verb's normal object moves to subject position, and the normal subject is demoted to an optional 'by'-phrase or omitted entirely.",
+      "\u201CThe dog chased the cat\u201D (active) becomes \u201CThe cat was chased (by the dog)\u201D (passive): \u201Cthe cat\u201D moves from object position to subject position.",
+      "This DP-movement happens because the passive verb form can no longer assign Case to its object, so the object must move to a position where it can receive Case."
+    ],
+    "example": {
+      "sentence": "The cake was eaten.",
+      "words": ["The", "cake", "was", "eaten"],
+      "gold": [
+        { "s": 0, "e": 1, "label": "NP" },
+        { "s": 2, "e": 3, "label": "VP" },
+        { "s": 0, "e": 3, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "The window was broken yesterday.",
+      "words": ["The", "window", "was", "broken", "yesterday"],
+      "gold": [
+        { "s": 0, "e": 1, "label": "NP", "note": "\u201CThe window\u201D — surface subject, but originally the object of \u201Cbroke\u201D." },
+        { "s": 4, "e": 4, "label": "AdvP", "note": "\u201Cyesterday\u201D — an adjunct." },
+        { "s": 2, "e": 4, "label": "VP", "note": "The passive VP: auxiliary + participle, with no object left behind.", "test": "DP-movement: object → subject in the passive." },
+        { "s": 0, "e": 4, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "control-raising",
+    "title": "Control and Raising",
+    "teaser": "Two verbs that both take 'to VP' complements — but assign the subject role very differently.",
+    "theory": [
+      "In control (\u201CSam wants to leave\u201D), the matrix subject \u201CSam\u201D is assigned a theta role by both the matrix verb and, understood, the embedded verb — \u201CSam\u201D controls the missing embedded subject.",
+      "In raising (\u201CSam seems to leave\u201D), the matrix verb assigns no theta role to \u201CSam\u201D at all — it originates as the subject of the embedded clause and raises up into matrix subject position.",
+      "The test: raising verbs allow a meaningless \u201Cit\u201D subject with the same meaning preserved (\u201CIt seems that Sam left\u201D); control verbs don't (\u201C*It wants that Sam left\u201D)."
+    ],
+    "example": {
+      "sentence": "Sam wants to leave.",
+      "words": ["Sam", "wants", "to", "leave"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP" },
+        { "s": 2, "e": 3, "label": "VP" },
+        { "s": 1, "e": 3, "label": "VP" },
+        { "s": 0, "e": 3, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "Sam seems to know.",
+      "words": ["Sam", "seems", "to", "know"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP", "note": "\u201CSam\u201D — surface subject of \u201Cseems\u201D, but originates as the subject of \u201Cknow\u201D and raises up." },
+        { "s": 2, "e": 3, "label": "VP", "note": "The embedded \u201Cto\u201D-clause, missing its own overt subject." },
+        { "s": 1, "e": 3, "label": "VP", "note": "\u201Cseems\u201D assigns no theta role to \u201CSam\u201D — compare \u201CIt seems that Sam knows.\u201D", "test": "Raising test: dummy \u201Cit\u201D subject preserves meaning." },
+        { "s": 0, "e": 3, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "islands",
+    "title": "Locality and Island Constraints",
+    "teaser": "Some structures just won't let a wh-word escape.",
+    "theory": [
+      "Movement is local: certain structural configurations, called islands, block a phrase from moving out of them — extraction across an island boundary produces ungrammaticality.",
+      "A complex NP with a relative clause is a classic island: \u201C*What did you meet the man who bought?\u201D is bad, even though the underlying structure looks unremarkable.",
+      "Islands motivate constraints on how far, and through what structures, movement can apply — locality is as important to syntax as constituency itself."
+    ],
+    "example": {
+      "sentence": "She knows who left.",
+      "words": ["She", "knows", "who", "left"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP" },
+        { "s": 2, "e": 2, "label": "NP" },
+        { "s": 3, "e": 3, "label": "VP" },
+        { "s": 2, "e": 3, "label": "S" },
+        { "s": 1, "e": 3, "label": "VP" },
+        { "s": 0, "e": 3, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "I wonder what happened.",
+      "words": ["I", "wonder", "what", "happened"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP", "note": "The matrix subject." },
+        { "s": 2, "e": 2, "label": "NP", "note": "\u201Cwhat\u201D — the embedded wh-subject." },
+        { "s": 3, "e": 3, "label": "VP", "note": "\u201Chappened\u201D — the embedded predicate." },
+        { "s": 2, "e": 3, "label": "S", "note": "This embedded question is itself an island — nothing can be extracted out of it.", "test": "Island: \u201C*What do you wonder what happened?\u201D is bad." },
+        { "s": 1, "e": 3, "label": "VP", "note": "\u201Cwonder\u201D takes the embedded question as its complement." },
+        { "s": 0, "e": 3, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "principles-parameters",
+    "title": "Principles and Parameters",
+    "teaser": "Universal principles hold across all languages; parameters set the language-specific switches.",
+    "theory": [
+      "Principles and Parameters theory holds that Universal Grammar consists of fixed principles common to every language, plus a small set of open parameters that each language fixes differently.",
+      "The head-direction parameter is a classic example: English fixes heads before complements (head-initial: \u201Ceat the apple\u201D), while Japanese fixes heads after complements (head-final).",
+      "Under this view, language acquisition is less about learning rules from scratch and more about setting a handful of parameters based on the input a child hears."
+    ],
+    "example": {
+      "sentence": "She ate the apple.",
+      "words": ["She", "ate", "the", "apple"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP" },
+        { "s": 2, "e": 3, "label": "NP" },
+        { "s": 1, "e": 3, "label": "VP" },
+        { "s": 0, "e": 3, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "He read the letter.",
+      "words": ["He", "read", "the", "letter"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP", "note": "The subject." },
+        { "s": 2, "e": 3, "label": "NP", "note": "\u201Cthe letter\u201D — the complement, following the head verb, as English's head-initial setting predicts." },
+        { "s": 1, "e": 3, "label": "VP", "note": "Head (V) before complement (NP) — exactly what the head-direction parameter fixes for English.", "test": "Head-initial parameter: V precedes its complement." },
+        { "s": 0, "e": 3, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "minimalist-program",
+    "title": "The Minimalist Program",
+    "teaser": "Stripping syntax down to the fewest operations and principles possible.",
+    "theory": [
+      "The Minimalist Program aims to explain syntactic structure using the smallest possible set of operations and theoretical machinery — economy of derivation and representation.",
+      "Instead of many phrase-specific rules, Minimalism proposes structure is built by one recursive operation, Merge, combining two elements into a larger unit at every step.",
+      "Constraints once stated as separate principles are, under Minimalism, often derived from more general economy conditions — do the minimum necessary to satisfy the interfaces with sound and meaning."
+    ],
+    "example": {
+      "sentence": "Birds sing.",
+      "words": ["Birds", "sing"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP" },
+        { "s": 1, "e": 1, "label": "VP" },
+        { "s": 0, "e": 1, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "Rivers flow downhill.",
+      "words": ["Rivers", "flow", "downhill"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP", "note": "A lexical item projecting as NP." },
+        { "s": 2, "e": 2, "label": "AdvP", "note": "\u201Cdownhill\u201D — merged with the verb." },
+        { "s": 1, "e": 2, "label": "VP", "note": "Merge(flow, downhill) — combining V and AdvP into VP.", "test": "Merge: combine two syntactic objects into one larger object." },
+        { "s": 0, "e": 2, "label": "S", "note": "Merge(NP, VP) — the final Merge step yields the full clause." }
+      ]
+    }
+  },
+  {
+    "id": "merge-move-agree",
+    "title": "Minimalism: Merge, Move, and Agree",
+    "teaser": "The three core operations that build every Minimalist derivation.",
+    "theory": [
+      "Merge combines two syntactic objects into one new object, and is the basic structure-building operation — applied recursively, it builds an entire tree from individual words.",
+      "Move (or Internal Merge) takes a phrase already in the structure and re-merges it in a higher position — this is how Minimalism reanalyzes wh-movement and passive movement as a single operation.",
+      "Agree establishes a feature relationship between two elements without necessarily moving either one, such as subject-verb agreement in person and number, checked at a distance."
+    ],
+    "example": {
+      "sentence": "The dog barks.",
+      "words": ["The", "dog", "barks"],
+      "gold": [
+        { "s": 0, "e": 1, "label": "NP" },
+        { "s": 2, "e": 2, "label": "VP" },
+        { "s": 0, "e": 2, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "The dogs bark loudly.",
+      "words": ["The", "dogs", "bark", "loudly"],
+      "gold": [
+        { "s": 0, "e": 1, "label": "NP", "note": "Built by External Merge, combining the determiner and noun." },
+        { "s": 3, "e": 3, "label": "AdvP", "note": "\u201Cloudly\u201D — merged with the verb." },
+        { "s": 2, "e": 3, "label": "VP", "note": "External Merge(bark, loudly)." },
+        { "s": 0, "e": 3, "label": "S", "note": "\u201Cdogs\u201D and \u201Cbark\u201D agree in number — an Agree relation holding between subject and verb.", "test": "Agree: feature-checking between subject and verb, without movement." }
+      ]
+    }
+  },
+  {
+    "id": "syntax-semantics",
+    "title": "Syntax-Semantics Interface",
+    "teaser": "How tree structure feeds into meaning — and creates ambiguity when it's unclear.",
+    "theory": [
+      "The syntax-semantics interface is the mapping from syntactic structure to meaning: a sentence's interpretation is typically built up compositionally, following its constituent structure.",
+      "Structural ambiguity — like PP-attachment — arises exactly when a single string of words maps onto more than one tree, and each tree supports a different meaning.",
+      "Quantifier scope is another case where structure matters for meaning: \u201CEvery student read a book\u201D can mean one book for all, or a different book per student, depending on how the quantifiers relate."
+    ],
+    "example": {
+      "sentence": "I saw the man with binoculars.",
+      "words": ["I", "saw", "the", "man", "with", "binoculars"],
+      "gold": [
+        { "s": 0, "e": 0, "label": "NP" },
+        { "s": 2, "e": 3, "label": "NP" },
+        { "s": 4, "e": 5, "label": "PP" },
+        { "s": 1, "e": 5, "label": "VP" },
+        { "s": 0, "e": 5, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "Every student read a book.",
+      "words": ["Every", "student", "read", "a", "book"],
+      "gold": [
+        { "s": 0, "e": 1, "label": "NP", "note": "\u201CEvery student\u201D — a quantified subject NP." },
+        { "s": 3, "e": 4, "label": "NP", "note": "\u201Ca book\u201D — a quantified object NP." },
+        { "s": 2, "e": 4, "label": "VP", "note": "The predicate, containing both quantified NPs — their relative scope isn't fixed by bracketing alone.", "test": "Scope ambiguity: one book total, or one book per student — same tree, two readings." },
+        { "s": 0, "e": 4, "label": "S" }
+      ]
+    }
+  },
+  {
+    "id": "syntax-phonology",
+    "title": "Syntax-Phonology Interface",
+    "teaser": "Why pauses and intonation tend to fall at syntactic boundaries.",
+    "theory": [
+      "The syntax-phonology interface studies how syntactic structure is reflected in phonological phrasing — pauses, intonational boundaries, and stress tend to align with the edges of major constituents.",
+      "A speaker is more likely to pause between the subject NP and the predicate VP than in the middle of either one, because prosodic phrases are built from syntactic ones.",
+      "This is why punctuation and phrasing in speech often mirror tree structure: a comma frequently marks a boundary that syntax has already carved out."
+    ],
+    "example": {
+      "sentence": "The tired hikers rested.",
+      "words": ["The", "tired", "hikers", "rested"],
+      "gold": [
+        { "s": 1, "e": 1, "label": "AdjP" },
+        { "s": 0, "e": 2, "label": "NP" },
+        { "s": 3, "e": 3, "label": "VP" },
+        { "s": 0, "e": 3, "label": "S" }
+      ]
+    },
+    "exercise": {
+      "sentence": "The nervous student answered slowly.",
+      "words": ["The", "nervous", "student", "answered", "slowly"],
+      "gold": [
+        { "s": 1, "e": 1, "label": "AdjP", "note": "\u201Cnervous\u201D — modifies the head noun." },
+        { "s": 0, "e": 2, "label": "NP", "note": "The subject NP — a likely prosodic boundary falls right after this, before the verb.", "test": "Prosodic boundary tends to align with the NP/VP edge." },
+        { "s": 4, "e": 4, "label": "AdvP", "note": "\u201Cslowly\u201D — adjunct to the verb." },
+        { "s": 3, "e": 4, "label": "VP", "note": "The predicate." },
+        { "s": 0, "e": 4, "label": "S" }
+      ]
+    }
+  }
+];
+
+// ---------------- Shared layout math ----------------
+function keyOf(s, e) { return s + "_" + e; }
+function mapFromGold(gold) {
+  var map = {};
+  gold.forEach(function (g) { map[keyOf(g.s, g.e)] = g.label; });
+  return map;
+}
+
+function buildForest(start, end, map, excludeKey) {
+  var nodes = [];
+  var i = start;
+  while (i <= end) {
+    var best = null;
+    Object.keys(map).forEach(function (k) {
+      if (k === excludeKey) return;
+      var parts = k.split("_").map(Number);
+      var s = parts[0], e = parts[1];
+      if (s === i && e <= end && (!best || e > best.e)) best = { s: s, e: e, label: map[k] };
+    });
+    if (best) {
+      var childKey = keyOf(best.s, best.e);
+      nodes.push({ type: "node", s: best.s, e: best.e, label: best.label, children: buildForest(best.s, best.e, map, childKey) });
+      i = best.e + 1;
+    } else {
+      nodes.push({ type: "leaf", s: i, e: i, index: i });
+      i++;
+    }
+  }
+  return nodes;
+}
+function heightOf(node) {
+  if (node.type === "leaf") return 0;
+  return 1 + Math.max.apply(null, node.children.map(heightOf));
+}
+function xOf(s, e) {
+  return ((s + e) / 2) * SPACING + SPACING / 2;
+}
+function flatten(node, maxHeight, words, out) {
+  var x = xOf(node.s, node.e);
+  if (node.type === "leaf") {
+    var y0 = maxHeight * ROW_HEIGHT + TOP_PAD;
+    out.leaves.push({ x: x, y: y0, word: words[node.index] });
+    return { x: x, y: y0 };
+  }
+  var h = heightOf(node);
+  var y = (maxHeight - h) * ROW_HEIGHT + TOP_PAD;
+  var childPos = node.children.map(function (c) { return flatten(c, maxHeight, words, out); });
+  childPos.forEach(function (cp) { out.edges.push({ x1: x, y1: y + 12, x2: cp.x, y2: cp.y - 12 }); });
+  out.pills.push({ x: x, y: y, label: node.label, s: node.s, e: node.e });
+  return { x: x, y: y };
+}
+// Builds a renderable layout (pill positions + connecting edges) from any
+// list of {s,e,label} nodes — used for gold trees AND the student's own
+// in-progress tree, since both are just span/label lists.
+function computeLayout(words, nodeList) {
+  var map = mapFromGold(nodeList);
+  var forest = buildForest(0, words.length - 1, map);
+  var maxHeight = Math.max.apply(null, [0].concat(forest.map(heightOf)));
+  var out = { pills: [], edges: [], leaves: [] };
+  forest.forEach(function (n) { flatten(n, maxHeight, words, out); });
+  var width = Math.max(words.length * SPACING, 160);
+  var height = (maxHeight + 1) * ROW_HEIGHT + TOP_PAD + 12;
+  return { width: width, height: height, nodes: out.pills, edges: out.edges };
+}
+
+// ---------------- DOM helpers ----------------
+function el(tag, cls) {
+  var e = document.createElement(tag);
+  if (cls) e.className = cls;
+  return e;
+}
+function svgEl(tag) {
+  return document.createElementNS("http://www.w3.org/2000/svg", tag);
+}
+
+function renderTreeDiagram(words, nodeList, pillClass) {
+  var layout = computeLayout(words, nodeList);
+  var wrap = el("div", "tree-diagram");
+  wrap.style.width = layout.width + "px";
+  wrap.style.height = layout.height + "px";
+  var svg = svgEl("svg");
+  svg.setAttribute("width", layout.width);
+  svg.setAttribute("height", layout.height);
+  svg.style.position = "absolute"; svg.style.top = "0"; svg.style.left = "0";
+  layout.edges.forEach(function (e) {
+    var line = svgEl("line");
+    line.setAttribute("x1", e.x1); line.setAttribute("y1", e.y1);
+    line.setAttribute("x2", e.x2); line.setAttribute("y2", e.y2);
+    line.setAttribute("stroke", "#B9B3A3"); line.setAttribute("stroke-width", "1.5");
+    svg.appendChild(line);
+  });
+  wrap.appendChild(svg);
+  layout.nodes.forEach(function (p) {
+    var pill = el("div", "tree-pill " + pillClass);
+    pill.style.left = p.x + "px"; pill.style.top = p.y + "px";
+    pill.textContent = p.label;
+    wrap.appendChild(pill);
+  });
+  return wrap;
+}
+
+function renderOverlay(goldLayout, statuses) {
+  var wrap = el("div", "correction-overlay");
+  wrap.style.position = "absolute"; wrap.style.top = "0"; wrap.style.left = "0";
+  wrap.style.width = goldLayout.width + "px"; wrap.style.height = goldLayout.height + "px";
+  wrap.style.pointerEvents = "none";
+  var svg = svgEl("svg");
+  svg.setAttribute("width", goldLayout.width); svg.setAttribute("height", goldLayout.height);
+  svg.style.position = "absolute"; svg.style.top = "0"; svg.style.left = "0";
+  goldLayout.edges.forEach(function (e) {
+    var line = svgEl("line");
+    line.setAttribute("x1", e.x1); line.setAttribute("y1", e.y1);
+    line.setAttribute("x2", e.x2); line.setAttribute("y2", e.y2);
+    line.setAttribute("stroke", "#8A8477"); line.setAttribute("stroke-width", "1.2");
+    line.setAttribute("stroke-dasharray", "3,3"); line.setAttribute("opacity", "0.6");
+    svg.appendChild(line);
+  });
+  wrap.appendChild(svg);
+  var colors = { correct: "#3F6B52", missing: "#A6482F", wrong_label: "#B8863B", extra: "#8A8477" };
+  statuses.forEach(function (s) {
+    var color = colors[s.status] || colors.extra;
+    var text;
+    if (s.status === "correct") text = "\u2713 " + s.label;
+    else if (s.status === "missing") text = "+ " + s.label;
+    else if (s.status === "wrong_label") text = (s.userLabel || "?") + " \u2192 " + s.label;
+    else text = s.label;
+    var pill = el("div", "overlay-pill");
+    pill.style.left = s.x + "px"; pill.style.top = s.y + "px";
+    pill.style.borderColor = color; pill.style.color = color;
+    pill.textContent = text;
+    wrap.appendChild(pill);
+  });
+  return wrap;
+}
+
+function renderWordRow(words, width, selStart, selEnd, onClick) {
+  var wrap = el("div", "word-row");
+  wrap.style.width = width + "px";
+  words.forEach(function (w, i) {
+    var isSel = selStart !== null && i >= selStart && i <= selEnd;
+    var btn = el("button", "word-btn" + (isSel ? " word-btn-selected" : ""));
+    btn.style.left = xOf(i, i) + "px";
+    btn.textContent = w;
+    btn.onclick = function () { onClick(i); };
+    wrap.appendChild(btn);
+  });
+  return wrap;
+}
+
+// ---------------- App state ----------------
+var screen = "home";
+var currentLessonId = null;
+var scores = {};
+try { scores = JSON.parse(localStorage.getItem("bb_scores") || "{}"); } catch (e) { scores = {}; }
+
+var lessonState = null;
+var lessonRefs = null;
+
+function saveScores() {
+  try { localStorage.setItem("bb_scores", JSON.stringify(scores)); } catch (e) {}
+}
+
+function renderApp() {
+  var app = document.getElementById("app");
+  app.innerHTML = "";
+  if (screen === "home") renderHome(app);
+  else renderLesson(app);
+}
+
+function renderHome(container) {
+  var wrap = el("div", "screen");
+  var h1 = el("h1", "title"); h1.textContent = "Bracket & Branch";
+  var p = el("p", "subtitle"); p.textContent = "Syntax lessons — build your own trees, get corrections in place.";
+  wrap.appendChild(h1); wrap.appendChild(p);
+
+  var list = el("div", "lesson-list");
+  LESSONS.forEach(function (l, i) {
+    var btn = el("button", "lesson-item");
+    btn.onclick = function () { currentLessonId = l.id; screen = "lesson"; renderApp(); window.scrollTo(0, 0); };
+    var num = el("div", "lesson-num"); num.textContent = (i + 1);
+    var body = el("div", "lesson-body");
+    var titleRow = el("div", "lesson-title-row");
+    var t = el("p", "lesson-title-text"); t.textContent = l.title;
+    titleRow.appendChild(t);
+    if (scores[l.id]) { var check = el("span", "check-badge"); check.textContent = "\u2713"; titleRow.appendChild(check); }
+    var teaser = el("p", "lesson-teaser"); teaser.textContent = l.teaser;
+    body.appendChild(titleRow); body.appendChild(teaser);
+    btn.appendChild(num); btn.appendChild(body);
+    list.appendChild(btn);
+  });
+  wrap.appendChild(list);
+
+  var fb = el("p", "fb-link");
+  fb.innerHTML = '<a href="https://www.facebook.com/Factsbyexperiences?mibextid=rS40aB7S9Ucbxw6v" target="_blank" rel="noopener noreferrer">Follow us on Facebook</a>';
+  wrap.appendChild(fb);
+
+  container.appendChild(wrap);
+}
+
+function renderLesson(container) {
+  var lesson = LESSONS.filter(function (l) { return l.id === currentLessonId; })[0];
+  lessonState = { selStart: null, selEnd: null, nodes: [], overlay: null, hint: null };
+
+  var wrap = el("div", "screen");
+
+  var backBtn = el("button", "back-btn"); backBtn.innerHTML = "\u2190 All lessons";
+  backBtn.onclick = function () { screen = "home"; renderApp(); window.scrollTo(0, 0); };
+  wrap.appendChild(backBtn);
+
+  var h1 = el("h1", "lesson-heading"); h1.textContent = lesson.title;
+  wrap.appendChild(h1);
+
+  var theoryWrap = el("div", "theory-wrap");
+  lesson.theory.forEach(function (p) { var pEl = el("p", "theory-p"); pEl.textContent = p; theoryWrap.appendChild(pEl); });
+  wrap.appendChild(theoryWrap);
+
+  var exampleBox = el("div", "example-box");
+  var exLabel = el("p", "eyebrow"); exLabel.textContent = "Worked example";
+  var exSentence = el("p", "example-sentence"); exSentence.textContent = lesson.example.sentence;
+  exampleBox.appendChild(exLabel); exampleBox.appendChild(exSentence);
+  var exTreeScroll = el("div", "tree-scroll");
+  exTreeScroll.appendChild(renderTreeDiagram(lesson.example.words, lesson.example.gold, "pill-blue"));
+  exampleBox.appendChild(exTreeScroll);
+  wrap.appendChild(exampleBox);
+
+  var exEyebrow = el("p", "eyebrow"); exEyebrow.textContent = "Your turn \u2014 build the tree";
+  wrap.appendChild(exEyebrow);
+
+  var exBox = el("div", "exercise-box");
+  var exSentence2 = el("p", "exercise-sentence"); exSentence2.textContent = lesson.exercise.sentence;
+  var exHint = el("p", "exercise-hint");
+  exHint.textContent = "Tap a word to start a span, tap another to extend it, then pick a label. Tap a single word twice to select just that word.";
+  exBox.appendChild(exSentence2); exBox.appendChild(exHint);
+
+  var scrollWrap = el("div", "tree-scroll");
+  var innerWrap = el("div", "exercise-inner");
+  scrollWrap.appendChild(innerWrap);
+  exBox.appendChild(scrollWrap);
+
+  var labelPickerHolder = el("div", "label-picker-holder");
+  exBox.appendChild(labelPickerHolder);
+
+  var chipsHolder = el("div", "chips-holder");
+  exBox.appendChild(chipsHolder);
+
+  var actionsRow = el("div", "actions-row");
+  var resetBtn = el("button", "icon-btn"); resetBtn.innerHTML = "\u21BA";
+  resetBtn.onclick = function () {
+    lessonState.nodes = []; lessonState.overlay = null; lessonState.selStart = null; lessonState.selEnd = null;
+    refreshExercise();
+  };
+  var checkBtn = el("button", "check-btn"); checkBtn.textContent = "Check my tree";
+  checkBtn.onclick = function () { checkTree(lesson); };
+  actionsRow.appendChild(resetBtn); actionsRow.appendChild(checkBtn);
+  exBox.appendChild(actionsRow);
+
+  wrap.appendChild(exBox);
+
+  var hintHolder = el("p", "hint-text");
+  wrap.appendChild(hintHolder);
+
+  var resultHolder = el("div", "result-holder");
+  wrap.appendChild(resultHolder);
+
+  container.appendChild(wrap);
+
+  lessonRefs = {
+    lesson: lesson,
+    innerWrap: innerWrap,
+    labelPickerHolder: labelPickerHolder,
+    chipsHolder: chipsHolder,
+    hintHolder: hintHolder,
+    resultHolder: resultHolder
+  };
+  refreshExercise();
+}
+
+function clickWord(i) {
+  lessonState.overlay = null;
+  if (lessonState.selStart === null) {
+    lessonState.selStart = i;
+    lessonState.selEnd = i;
+  } else {
+    var s = lessonState.selStart;
+    lessonState.selStart = Math.min(s, i);
+    lessonState.selEnd = Math.max(s, i);
+  }
+  refreshExercise();
+}
+function cancelSelection() {
+  lessonState.selStart = null;
+  lessonState.selEnd = null;
+  refreshExercise();
+}
+function addLabel(label) {
+  var s = lessonState.selStart, e = lessonState.selEnd;
+  lessonState.nodes = lessonState.nodes.filter(function (n) { return !(n.s === s && n.e === e); });
+  lessonState.nodes.push({ s: s, e: e, label: label });
+  cancelSelection();
+}
+function removeNode(s, e) {
+  lessonState.overlay = null;
+  lessonState.nodes = lessonState.nodes.filter(function (n) { return !(n.s === s && n.e === e); });
+  refreshExercise();
+}
+
+function checkTree(lesson) {
+  var ex = lesson.exercise;
+  if (lessonState.nodes.length === 0) {
+    lessonState.hint = "Build a tree first \u2014 tap two words to select a span, then choose a label.";
+    refreshExercise();
+    return;
+  }
+  lessonState.hint = null;
+  var goldLayout = computeLayout(ex.words, ex.gold);
+  var statuses = goldLayout.nodes.map(function (g) {
+    var match = lessonState.nodes.filter(function (n) { return n.s === g.s && n.e === g.e; })[0];
+    var status;
+    if (!match) status = "missing";
+    else if (match.label === g.label) status = "correct";
+    else status = "wrong_label";
+    var goldNode = ex.gold.filter(function (gg) { return gg.s === g.s && gg.e === g.e; })[0];
+    return {
+      x: g.x, y: g.y, s: g.s, e: g.e, label: g.label,
+      note: goldNode ? goldNode.note : null,
+      test: goldNode ? goldNode.test : null,
+      status: status,
+      userLabel: match ? match.label : null
+    };
+  });
+  var extra = lessonState.nodes.filter(function (n) {
+    return !ex.gold.some(function (g) { return g.s === n.s && g.e === n.e; });
+  });
+  lessonState.overlay = { statuses: statuses, extra: extra };
+  var perfect = statuses.every(function (s) { return s.status === "correct"; }) && extra.length === 0;
+  if (perfect) { scores[lesson.id] = true; saveScores(); }
+  refreshExercise();
+}
+
+function renderResultPanel(lesson) {
+  var ex = lesson.exercise;
+  var overlay = lessonState.overlay;
+  var correctCount = overlay.statuses.filter(function (s) { return s.status === "correct"; }).length;
+  var wrongOrMissing = overlay.statuses.filter(function (s) { return s.status !== "correct"; });
+  var perfect = correctCount === overlay.statuses.length && overlay.extra.length === 0;
+
+  var box = el("div", "result-box");
+  var header = el("div", "result-header");
+  var countP = el("p", "result-count"); countP.textContent = correctCount + "/" + overlay.statuses.length + " constituents correct";
+  header.appendChild(countP);
+  if (perfect) {
+    var badge = el("span", "perfect-badge"); badge.innerHTML = "\u2726 Perfect parse";
+    header.appendChild(badge);
+  }
+  box.appendChild(header);
+
+  var list = el("div", "result-list");
+  wrongOrMissing.forEach(function (s) {
+    var row = el("div", "result-row");
+    var tag = el("span", s.status === "missing" ? "tag tag-missing" : "tag tag-label");
+    tag.textContent = s.status === "missing" ? "missing" : "label";
+    row.appendChild(tag);
+    var textWrap = el("div");
+    var p = el("p", "result-line");
+    var labelSpan = el("span", "inline-pill"); labelSpan.textContent = s.label;
+    p.appendChild(labelSpan);
+    p.appendChild(document.createTextNode(' "' + ex.words.slice(s.s, s.e + 1).join(" ") + '"'));
+    if (s.status === "wrong_label" && s.userLabel) p.appendChild(document.createTextNode(" \u2014 you wrote " + s.userLabel));
+    textWrap.appendChild(p);
+    if (s.note) {
+      var noteP = el("p", "result-note");
+      noteP.textContent = s.note + (s.test ? " (" + s.test + ")" : "");
+      textWrap.appendChild(noteP);
+    }
+    row.appendChild(textWrap);
+    list.appendChild(row);
+  });
+  overlay.extra.forEach(function (n) {
+    var row = el("div", "result-row");
+    var tag = el("span", "tag tag-extra"); tag.textContent = "extra";
+    row.appendChild(tag);
+    var p = el("p", "result-line");
+    var labelSpan = el("span", "inline-pill"); labelSpan.textContent = n.label;
+    p.appendChild(labelSpan);
+    p.appendChild(document.createTextNode(' "' + ex.words.slice(n.s, n.e + 1).join(" ") + '" isn\u2019t one of the target constituents here.'));
+    row.appendChild(p);
+    list.appendChild(row);
+  });
+  if (wrongOrMissing.length === 0 && overlay.extra.length === 0) {
+    var okP = el("p", "all-good"); okP.textContent = "Every constituent checks out. Nicely built.";
+    list.appendChild(okP);
+  }
+  box.appendChild(list);
+  return box;
+}
+
+function refreshExercise() {
+  var lesson = lessonRefs.lesson;
+  var innerWrap = lessonRefs.innerWrap;
+  var labelPickerHolder = lessonRefs.labelPickerHolder;
+  var chipsHolder = lessonRefs.chipsHolder;
+  var hintHolder = lessonRefs.hintHolder;
+  var resultHolder = lessonRefs.resultHolder;
+  var ex = lesson.exercise;
+  var goldLayout = computeLayout(ex.words, ex.gold);
+
+  innerWrap.innerHTML = "";
+  innerWrap.style.width = goldLayout.width + "px";
+
+  var treeWrap = el("div", "tree-relative");
+  treeWrap.appendChild(renderTreeDiagram(ex.words, lessonState.nodes, "pill-blue"));
+  if (lessonState.overlay) treeWrap.appendChild(renderOverlay(goldLayout, lessonState.overlay.statuses));
+  innerWrap.appendChild(treeWrap);
+  innerWrap.appendChild(renderWordRow(ex.words, goldLayout.width, lessonState.selStart, lessonState.selEnd, clickWord));
+
+  labelPickerHolder.innerHTML = "";
+  if (lessonState.selStart !== null) {
+    var cap = el("p", "label-picker-caption");
+    cap.textContent = 'Label "' + ex.words.slice(lessonState.selStart, lessonState.selEnd + 1).join(" ") + '" as:';
+    labelPickerHolder.appendChild(cap);
+    var row = el("div", "label-row");
+    LABELS.forEach(function (label) {
+      var b = el("button", "label-btn"); b.textContent = label;
+      b.onclick = function () { addLabel(label); };
+      row.appendChild(b);
+    });
+    var cancel = el("button", "cancel-btn"); cancel.innerHTML = "\u21BA cancel";
+    cancel.onclick = cancelSelection;
+    row.appendChild(cancel);
+    labelPickerHolder.appendChild(row);
+  }
+
+  chipsHolder.innerHTML = "";
+  if (lessonState.nodes.length > 0) {
+    var chipsRow = el("div", "chips-row");
+    lessonState.nodes.forEach(function (n) {
+      var chip = el("span", "chip");
+      var lab = el("span", "chip-label"); lab.textContent = n.label;
+      chip.appendChild(lab);
+      chip.appendChild(document.createTextNode(" " + ex.words.slice(n.s, n.e + 1).join(" ") + " "));
+      var rm = el("button", "chip-remove"); rm.textContent = "\u2715";
+      rm.onclick = function () { removeNode(n.s, n.e); };
+      chip.appendChild(rm);
+      chipsRow.appendChild(chip);
+    });
+    chipsHolder.appendChild(chipsRow);
+  }
+
+  hintHolder.textContent = lessonState.hint || "";
+  hintHolder.style.display = lessonState.hint ? "block" : "none";
+
+  resultHolder.innerHTML = "";
+  if (lessonState.overlay) resultHolder.appendChild(renderResultPanel(lesson));
+}
+
+renderApp();
+</script>
+</body>
+</html>
