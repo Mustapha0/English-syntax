@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-<title>Bracket &amp; Branch</title>
+<title>English Syntax</title>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; background: #e7e5e4; }
@@ -34,6 +34,14 @@
 
   .fb-link { text-align: center; font-size: 12px; color: #94a3b8; margin-top: 24px; }
   .fb-link a { color: inherit; text-decoration: underline; }
+
+  .coffee-wrap { text-align: center; margin-top: 20px; }
+  .coffee-btn {
+    display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px;
+    background: #FFDD00; color: #1e293b; font-size: 14px; font-weight: 600; text-decoration: none;
+    border: 1px solid #e6c700; box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+  }
+  .coffee-note { font-size: 11px; color: #94a3b8; margin: 6px 0 0 0; }
 
   .back-btn {
     display: flex; align-items: center; gap: 4px; font-size: 14px; color: #64748b;
@@ -1216,7 +1224,7 @@ function renderApp() {
 
 function renderHome(container) {
   var wrap = el("div", "screen");
-  var h1 = el("h1", "title"); h1.textContent = "Bracket & Branch";
+  var h1 = el("h1", "title"); h1.textContent = "English Syntax";
   var p = el("p", "subtitle"); p.textContent = "Syntax lessons — build your own trees, get corrections in place.";
   wrap.appendChild(h1); wrap.appendChild(p);
 
@@ -1236,6 +1244,11 @@ function renderHome(container) {
     list.appendChild(btn);
   });
   wrap.appendChild(list);
+
+  var coffeeWrap = el("div", "coffee-wrap");
+  coffeeWrap.innerHTML = '<a class="coffee-btn" href="https://paypal.me/afkharm" target="_blank" rel="noopener noreferrer">\u2615 Buy me a coffee</a>' +
+    '<p class="coffee-note">Enjoying the app? A small tip keeps it free.</p>';
+  wrap.appendChild(coffeeWrap);
 
   var fb = el("p", "fb-link");
   fb.innerHTML = '<a href="https://www.facebook.com/Factsbyexperiences?mibextid=rS40aB7S9Ucbxw6v" target="_blank" rel="noopener noreferrer">Follow us on Facebook</a>';
@@ -1500,7 +1513,41 @@ function refreshExercise() {
   if (lessonState.overlay) resultHolder.appendChild(renderResultPanel(lesson));
 }
 
+// ---------------- Ads (AdMob banner, native app only) ----------------
+// Your live AdMob banner ad unit. Set ADMOB_TESTING to true if you want safe
+// Google test ads while trying things out (never tap your own live ads).
+// (Your AdMob *App ID* is set separately in .github/workflows/build-apk.yml.)
+var ADMOB_BANNER_ID = "ca-app-pub-9195867417549907/7525610063";
+var ADMOB_TESTING = false; // set to true while testing to get safe Google test ads
+
+function initAds() {
+  try {
+    if (!window.Capacitor || !Capacitor.isNativePlatform || !Capacitor.isNativePlatform()) return;
+    var AdMob = Capacitor.Plugins && Capacitor.Plugins.AdMob;
+    if (!AdMob) return;
+    // Keep page content from hiding behind the banner.
+    AdMob.addListener("bannerAdSizeChanged", function (info) {
+      document.body.style.paddingBottom = ((info && info.height) || 0) + "px";
+    });
+    AdMob.addListener("bannerAdFailedToLoad", function () {
+      document.body.style.paddingBottom = "0px";
+    });
+    AdMob.initialize({ initializeForTesting: ADMOB_TESTING })
+      .then(function () {
+        return AdMob.showBanner({
+          adId: ADMOB_BANNER_ID,
+          adSize: "ADAPTIVE_BANNER",
+          position: "BOTTOM_CENTER",
+          margin: 0,
+          isTesting: ADMOB_TESTING
+        });
+      })
+      .catch(function (e) { console.log("Ads unavailable:", e); });
+  } catch (e) { console.log("Ads init error:", e); }
+}
+
 renderApp();
+initAds();
 </script>
 </body>
 </html>
