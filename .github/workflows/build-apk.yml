@@ -33,6 +33,12 @@ jobs:
       - name: Add Android platform
         run: npx cap add android
 
+      - name: Generate app icons
+        run: |
+          npm install --no-save @capacitor/assets
+          npx capacitor-assets generate --android \
+            --iconBackgroundColor '#061528' --iconBackgroundColorDark '#061528'
+
       - name: Configure Android for AdMob
         run: |
           # AdMob's SDK needs minSdk 23+
