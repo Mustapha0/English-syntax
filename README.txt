@@ -1,53 +1,72 @@
-BRACKET & BRANCH — BUILD THE APK IN THE CLOUD (no local installs needed)
-=========================================================================
+ENGLISH SYNTAX
+==============
 
-This folder has everything needed for GitHub to build a real, installable,
-fully offline APK for you automatically. You just need a free GitHub
-account — no Android Studio, no Node.js, nothing installed on your own
-computer.
+An offline Android app for learning English syntax by building sentence
+trees yourself.
 
-STEPS
+ABOUT THE APP
+-------------
+English Syntax teaches how English sentences are put together, from the
+basics (what is a phrase?) to the ideas used in modern linguistics. It has
+29 short lessons. Each lesson gives you:
 
-1. Go to https://github.com and create a free account if you don't have one.
+  - A brief explanation of the concept
+  - A worked example with a tree diagram
+  - A hands-on exercise: tap words to select a span, choose a label
+    (NP, VP, PP, S, CP, AdjP, AdvP), and build the tree yourself
+  - Instant feedback: the app marks each part correct, missing, or
+    mislabeled, and explains why, so you learn from every mistake
 
-2. Create a new repository:
-   - Click the "+" in the top right -> "New repository"
-   - Name it anything, e.g. "bracket-and-branch"
-   - Keep it Public or Private, either works
-   - Do NOT initialize with a README (leave it empty)
-   - Click "Create repository"
+Topics covered include constituents, noun/verb/prepositional phrases,
+clauses and complementizers, PP attachment and ambiguity, complements vs.
+adjuncts, constituency tests, context-free grammars, phrase structure
+rules, X-bar theory, argument structure and theta roles, Case, binding,
+head movement, wh-movement, passives, control and raising, island
+constraints, principles and parameters, the Minimalist Program, and the
+syntax-semantics and syntax-phonology interfaces.
 
-3. Upload this folder's contents to that repository:
-   - On the new repo's page, click "uploading an existing file"
-   - Drag in every file and folder from this zip (unzip it first) —
-     including the hidden ".github" folder and the ".gitignore" file.
-     If your file browser hides files starting with a dot, use your
-     computer's "show hidden files" setting, or use GitHub Desktop
-     instead of the web uploader (it shows everything).
-   - Commit the files (the green "Commit changes" button)
+Lessons you complete with a perfect tree get a checkmark, and your
+progress is saved on your device. Everything works fully offline: no
+account, no internet connection needed to learn.
 
-4. GitHub builds it automatically:
-   - Click the "Actions" tab at the top of your repo
-   - You'll see a workflow run start within a few seconds (or click
-     "Run workflow" if it doesn't start automatically)
-   - Wait for it to finish — usually 3 to 6 minutes. A green checkmark
-     means success; red X means something failed (click into it, the
-     logs will show what).
+The app also has a "Buy me a coffee" button (paypal.me/afkharm) and a
+small banner ad (Google AdMob). Ads need internet to load; the lessons
+do not.
 
-5. Download your APK:
-   - Click into the finished workflow run
-   - Scroll to "Artifacts" at the bottom
-   - Download "bracket-and-branch-debug-apk" — it's a zip containing
-     app-debug.apk
-   - Unzip it, and that .apk is what you install on your phone.
 
-INSTALLING ON YOUR PHONE
+BUILD THE APK IN THE CLOUD (no local installs needed)
+=====================================================
+This folder has everything GitHub needs to build a real, installable APK
+for you automatically. You only need a free GitHub account.
 
-- Transfer app-debug.apk to your phone (email, cloud drive, USB, etc.)
-- Tap the file to install
-- Android will warn about "unknown sources" for a debug build not from
-  the Play Store — allow it in the prompt, that's expected and normal
-  for a personal build like this.
+1. Create a repository at https://github.com (leave it empty).
+2. Upload everything from this folder, including the hidden ".github"
+   folder and the ".gitignore" file. (If your file browser hides dot
+   files, turn on "show hidden files", or use GitHub Desktop.)
+3. Open the repo's "Actions" tab. The build starts automatically
+   (or click "Run workflow"). It takes about 3-6 minutes.
+4. When it shows a green check, open the run, scroll to "Artifacts", and
+   download "english-syntax-debug-apk". Unzip it to get app-debug.apk.
+5. Send app-debug.apk to your phone and tap it to install (allow
+   "unknown sources" when Android asks - normal for a personal build).
 
-This APK bundles index.html directly inside itself as a local asset —
-no Netlify, no live URL, no internet connection needed to run it.
+If installing over an older version fails, uninstall the old one first
+(each cloud build is signed with a fresh debug key).
+
+
+ADS SETTINGS
+============
+- Banner ad unit ID and test-mode switch: www/index.html
+  (ADMOB_BANNER_ID and ADMOB_TESTING). Set ADMOB_TESTING to true to see
+  safe Google test ads while trying things out.
+- AdMob App ID: .github/workflows/build-apk.yml (ADMOB_APP_ID).
+- Never tap your own live ads; Google can ban the AdMob account for it.
+- New ad units can take up to an hour before ads start showing.
+
+
+CHANGING THINGS LATER
+=====================
+- App name: "appName" in capacitor.config.json (and the title in
+  www/index.html).
+- Donation link: search for paypal.me in www/index.html.
+- After any change, commit to GitHub and the Actions tab rebuilds the APK.

@@ -1,6 +1,6 @@
 {
   "appId": "com.bracketandbranch.app",
-  "appName": "Bracket & Branch",
+  "appName": "English Syntax",
   "webDir": "www",
   "server": {
     "androidScheme": "https"
