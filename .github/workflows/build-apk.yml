@@ -5,6 +5,10 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+env:
+  # Your AdMob App ID.
+  ADMOB_APP_ID: "ca-app-pub-9195867417549907~7389878691"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,6 +33,23 @@ jobs:
       - name: Add Android platform
         run: npx cap add android
 
+      - name: Configure Android for AdMob
+        run: |
+          # AdMob's SDK needs minSdk 23+
+          sed -i 's/minSdkVersion = .*/minSdkVersion = 24/' android/variables.gradle
+          # Add the AdMob App ID to the manifest
+          python3 - <<'PY'
+          import os
+          p = 'android/app/src/main/AndroidManifest.xml'
+          s = open(p).read()
+          key = 'com.google.android.gms.ads.APPLICATION_ID'
+          if key not in s:
+              meta = '<meta-data android:name="%s" android:value="%s" />' % (key, os.environ['ADMOB_APP_ID'])
+              s = s.replace('</application>', '    ' + meta + '\n    </application>')
+              open(p, 'w').write(s)
+          PY
+          grep -n "APPLICATION_ID" android/app/src/main/AndroidManifest.xml
+
       - name: Sync web assets into Android project
         run: npx cap sync android
 
@@ -41,5 +62,5 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: bracket-and-branch-debug-apk
+          name: english-syntax-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
