@@ -66,6 +66,9 @@ ADS SETTINGS
 
 CHANGING THINGS LATER
 =====================
+- App icon: replace the images in the assets/ folder (icon-only.png,
+  icon-foreground.png, icon-background.png; 1024x1024). The build
+  generates all Android icon sizes from them.
 - App name: "appName" in capacitor.config.json (and the title in
   www/index.html).
 - Donation link: search for paypal.me in www/index.html.
